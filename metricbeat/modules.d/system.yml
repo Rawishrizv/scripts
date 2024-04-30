@@ -1,0 +1,34 @@
+# Module: system
+# Docs: https://www.elastic.co/guide/en/beats/metricbeat/7.6/metricbeat-module-system.html
+
+- module: system
+  period: 60s
+  metricsets:
+    - service
+  service.pattern_filter: ["suricata.service", "iptables.service", "blacklist.service", "accounting.service", "named.service", "iperftester.service", "radiusd.service", "squid.service", "eset.service"]
+  service.state_filter: ["inactive"]
+  
+- module: system
+  period: 30s
+  metricsets:
+    - network
+
+- module: system
+  period: 1835s
+  metricsets:
+    - cpu
+
+- module: system
+  period: 620s
+  metricsets:
+    - memory
+
+- module: system
+  period: 610s
+  metricsets:
+    - load
+
+- module: system
+  period: 1810s
+  metricsets:
+    - filesystem

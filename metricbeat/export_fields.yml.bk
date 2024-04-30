@@ -1,0 +1,423 @@
+# Custom fields of index template collected by metric beat and vpn_beat
+# metricbeat: system module (service, load, memory, network, cpu, filesystem) metricsets
+# vpn_beat: vpn module (openvpn, strongswan) metricsets
+
+- key: common
+  title: Common
+  description: >
+    Contains common beat fields available in all event types.
+  fields:
+  - name: '@timestamp'
+    required: true
+    type: date
+    description: 'Date/time when the event originated'
+    example: '2016-05-23T08:05:34.853Z'
+  - name: event.dataset
+    type: keyword
+    ignore_above: 1024
+    description: Name of module and metricset
+    example: vpn.openvpn
+  - name: host
+    title: Host
+    description: 'Fields spcifying the host information'
+    type: group
+    fields:
+    - name: hostname
+      type: keyword
+      ignore_above: 1024
+      description: Name of the host machine.
+      example: na-08
+    - name: platform
+      type: keyword
+      ignore_above: 1024
+      description: Name of the platform running on host.
+      example: ubuntu
+    - name: geo.continent_name
+      type: keyword
+      ignore_above: 1024
+      description: Name of the continent.
+      example: North America
+    - name: geo.country_iso_code
+      type: keyword
+      ignore_above: 1024
+      description: Country ISO code.
+      example: CA
+    - name: geo.city_name
+      type: keyword
+      ignore_above: 1024
+      description: City name.
+      example: Montreal
+    - name: geo.name
+      type: keyword
+      ignore_above: 1024
+      description: 'User-defined description of a location'
+      example: boston-dc
+
+- key: system
+  title: "System"
+  description: >
+    System status metrics, like CPU and memory usage, that are collected from the operating system.
+    Metricsets -> cpu, load, memory, network, filesystem, service
+    Collected by metricbeat
+  short_config: true
+  release: ga
+  fields:
+    - name: system
+      type: group
+      description: >
+        `system` contains local system metrics.
+      fields:
+        - name: service
+          type: group
+          release: beta
+          description: >
+            metrics for system services
+          fields:
+            - name: name
+              type: keyword
+              description: The name of the service
+            - name: load_state
+              type: keyword
+              description: The load state of the service
+            - name: state
+              type: keyword
+              description: The activity state of the service
+            - name: sub_state
+              type: keyword
+              description: The sub-state of the service
+            - name: state_since
+              type: date
+              description: The timestamp of the last state change. If the service is active and running, this is its uptime.
+    - name: load
+      type: group
+      description: >
+        CPU load averages.
+      release: ga
+      fields:
+        - name: "1"
+          type: scaled_float
+          scaling_factor: 100
+          description: >
+            Load average for the last minute.
+        - name: "5"
+          type: scaled_float
+          scaling_factor: 100
+          description: >
+            Load average for the last 5 minutes.
+        - name: "15"
+          type: scaled_float
+          scaling_factor: 100
+          description: >
+            Load average for the last 15 minutes.
+        - name: "norm.1"
+          type: scaled_float
+          scaling_factor: 100
+          description: >
+            Load for the last minute divided by the number of cores.
+        - name: "norm.5"
+          type: scaled_float
+          scaling_factor: 100
+          description: >
+            Load for the last 5 minutes divided by the number of cores.
+        - name: "norm.15"
+          type: scaled_float
+          scaling_factor: 100
+          description: >
+            Load for the last 15 minutes divided by the number of cores.
+        - name: "cores"
+          type: long
+          description: >
+            The number of CPU cores present on the host.
+    - name: memory
+      type: group
+      description: >
+        `memory` contains local memory stats.
+      release: ga
+      fields:
+        - name: total
+          type: long
+          format: bytes
+          description: >
+            Total memory.
+        - name: used.bytes
+          type: long
+          format: bytes
+          description: >
+            Used memory.
+        - name: free
+          type: long
+          format: bytes
+          description: >
+            The total amount of free memory in bytes. This value does not include memory consumed by system caches and
+            buffers (see system.memory.actual.free).
+        - name: used.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of used memory.
+        - name: actual
+          type: group
+          description: >
+            Actual memory used and free.
+          fields:
+            - name: used.bytes
+              type: long
+              format: bytes
+              description: >
+                Actual used memory in bytes. It represents the difference between the total and the available memory. The
+                available memory depends on the OS. For more details, please check `system.actual.free`.
+            - name: free
+              type: long
+              format: bytes
+              description: >
+                Actual free memory in bytes. It is calculated based on the OS. On Linux this value will be MemAvailable from /proc/meminfo,
+                or calculated from free memory plus caches and buffers if /proc/meminfo is not available.
+                On OSX it is a sum of free memory and the inactive memory. On Windows, it is equal
+                to `system.memory.free`.
+            - name: used.pct
+              type: scaled_float
+              format: percent
+              description: >
+                The percentage of actual used memory.
+        - name: swap
+          type: group
+          prefix: "[float]"
+          description: This group contains statistics related to the swap memory usage on the system.
+          fields:
+            - name: total
+              type: long
+              format: bytes
+              description: >
+                Total swap memory.
+            - name: used.bytes
+              type: long
+              format: bytes
+              description: >
+                Used swap memory.
+            - name: free
+              type: long
+              format: bytes
+              description: >
+                Available swap memory.
+            - name: used.pct
+              type: scaled_float
+              format: percent
+              description: >
+                The percentage of used swap memory.
+    - name: filesystem
+      type: group
+      description: >
+        `filesystem` contains local filesystem stats.
+      release: ga
+      fields:
+        - name: available
+          type: long
+          format: bytes
+          description: >
+            The disk space available to an unprivileged user in bytes.
+        - name: device_name
+          type: keyword
+          description: >
+            The disk name. For example: `/dev/disk1`
+        - name: type
+          type: keyword
+          description: >
+            The disk type. For example: `ext4`
+        - name: mount_point
+          type: keyword
+          description: >
+            The mounting point. For example: `/`
+        - name: files
+          type: long
+          description: >
+            The total number of file nodes in the file system.
+        - name: free
+          type: long
+          format: bytes
+          description: >
+            The disk space available in bytes.
+        - name: free_files
+          type: long
+          description: >
+            The number of free file nodes in the file system.
+        - name: total
+          type: long
+          format: bytes
+          description: >
+            The total disk space in bytes.
+        - name: used.bytes
+          type: long
+          format: bytes
+          description: >
+            The used disk space in bytes.
+        - name: used.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of used disk space.
+    - name: cpu
+      type: group
+      description: >
+        `cpu` contains local CPU stats.
+      release: ga
+      fields:
+        - name: cores
+          type: long
+          description: >
+            The number of CPU cores present on the host. The non-normalized
+            percentages will have a maximum value of `100% * cores`. The
+            normalized percentages already take this value into account and have
+            a maximum value of 100%.
+        # Percentages
+        - name: user.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of CPU time spent in user space. On multi-core systems,
+            you can have percentages that are greater than 100%. For example, if 3
+            cores are at 60% use, then the `system.cpu.user.pct` will be 180%.
+        - name: system.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of CPU time spent in kernel space.
+        - name: nice.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of CPU time spent on low-priority processes.
+        - name: idle.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of CPU time spent idle.
+        - name: iowait.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of CPU time spent in wait (on disk).
+        - name: irq.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of CPU time spent servicing and handling hardware interrupts.
+        - name: softirq.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of CPU time spent servicing and handling software interrupts.
+        - name: steal.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of CPU time spent in involuntary wait by the virtual CPU while the hypervisor
+            was servicing another processor.
+            Available only on Unix.
+        - name: total.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of CPU time spent in states other than Idle and IOWait.
+    - name: network
+      type: group
+      description: >
+        `network` contains network IO metrics for a single network interface.
+      release: ga
+      fields:
+        - name: name
+          type: keyword
+          example: eth0
+          description: >
+            The network interface name.
+        - name: out.bytes
+          type: long
+          format: bytes
+          description: >
+            The number of bytes sent.
+        - name: in.bytes
+          type: long
+          format: bytes
+          description: >
+            The number of bytes received.
+        - name: out.packets
+          type: long
+          description: >
+            The number of packets sent.
+        - name: in.packets
+          type: long
+          description: >
+            The number or packets received.
+        - name: in.errors
+          type: long
+          description: >
+            The number of errors while receiving.
+        - name: out.errors
+          type: long
+          description: >
+            The number of errors while sending.
+        - name: in.dropped
+          type: long
+          description: >
+            The number of incoming packets that were dropped.
+        - name: out.dropped
+          type: long
+          description: >
+            The number of outgoing packets that were dropped. This value is always
+            0 on Darwin and BSD because it is not reported by the operating system.
+
+- key: vpn
+  title: "vpn"
+  release: beta
+  description: >
+    vpn module
+  fields:
+    - name: vpn
+      type: group
+      description: >
+      fields:
+        - name: openvpn
+          type: group
+          release: beta
+          description: >
+            user_count contains vpn stats, like nclinets, bytesin, bytesout, protocol
+          fields:
+            - name: port
+              type: long
+              description: >
+                Port on which management interface connect
+            - name: service
+              type: keyword
+              description: >
+                Service Name
+            - name: clients
+              type: long
+              description: >
+                 Number of clients
+            - name: bytesin
+              type: long
+              format: bytes
+              description: >
+                 Number of bytesin
+            - name: bytesout
+              type: long
+              format: bytes
+              description: >
+                 Number of bytes out
+        - name: strongswan
+          type: group
+          release: beta
+          description: >
+            strongswan ipsec and ikev2 user count metrics
+          fields:
+            - name: clients
+              type: long
+              description: >
+                Strongswan user count
+            - name: ipsec
+              type: long
+              description: >
+                ipsec user count
+            - name: ikev2
+              type: long
+              description: >
+                ikev2 user count

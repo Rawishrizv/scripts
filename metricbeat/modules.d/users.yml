@@ -1,0 +1,6 @@
+
+- module: users
+  metricsets: ["userscount"]
+  enabled: true
+  period: 30s
+  port: "10799"

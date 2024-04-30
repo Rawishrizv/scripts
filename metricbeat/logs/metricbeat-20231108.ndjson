@@ -1,0 +1,2 @@
+{"log.level":"info","@timestamp":"2023-11-08T12:16:33.843Z","log.origin":{"file.name":"instance/beat.go","file.line":806},"message":"Home path: [/etc/metricbeat] Config path: [/etc/metricbeat] Data path: [/etc/metricbeat/data] Logs path: [/etc/metricbeat/logs]","service.name":"metricbeat","ecs.version":"1.6.0"}
+{"log.level":"info","@timestamp":"2023-11-08T12:16:33.843Z","log.origin":{"file.name":"instance/beat.go","file.line":814},"message":"Beat ID: a67be31a-c4c3-40cf-8869-c7c0598679d1","service.name":"metricbeat","ecs.version":"1.6.0"}
